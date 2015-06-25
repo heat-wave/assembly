@@ -8,12 +8,18 @@ extern matrixSet        ; declare Matrix functions here?
 
 global parseImage
 
+%macro save_dword 0
+   xor r10, r10
+   mov r10d, dword [r8]
+%endmacro
+   
+
 struc Image
-    size            resq 1; size of the image in bytes
-    width           resq 1;
-    height          resq 1;
-    pixels          resq 1; pointer to Matrix instance
-    depth           resq 1;
+    sz:              resq 1; size of the image in bytes
+    width:           resd 1;
+    height:          resd 1;
+    pixels:          resq 1; pointer to Matrix instance
+    depth:           resw 1;
     ;TODO: more fields if necessary
 
 endstruc
@@ -31,7 +37,8 @@ parseImage:
     cmp word[r8], 'BM'  ; 'BM' is non-OS/2 bitmap header
     jne .mismatch
     add r8, 10
-    mov r9, dword[r8]   ; store offset to raw pixel
+    xor r9, r9
+    mov r9d, dword[r8]  ; store offset to raw pixel
                         ; data in r9
     add r8, 4
     cmp dword[r8], 40   ; check header size, 40 is standard
@@ -45,11 +52,14 @@ parseImage:
     pop rdi             ; state
 
     add r8, 4           ; save the dimensions of the image
-    mov [rax + width], dword[r8]
+    save_dword
+    mov [rax + width], r10d
     add r8, 4           ; in the corresponding fields
-    mov [rax + height], dword[r8]
+    save_dword
+    mov [rax + height], r10d
     add r8, 6           ; of our Image instance
-    mov [rax + depth], word[r8]
+    save_dword
+    mov [rax + depth], r10d
     add r8, 2
     cmp dword[r8], 0
     jne .mismatch
@@ -75,7 +85,7 @@ parseImage:
     mov rdi, [rax + pixels]
     mov rsi, r10
     mov rdx, r11
-    mov xmm0, dword[r8] ; fill a cell in Matrix
+    movss xmm0, dword[r8] ; fill a cell in Matrix
     call matrixSet
     add r8, 4           ; TODO: variable color depth?
     cmp r11, [rax + width]

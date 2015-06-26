@@ -33,23 +33,31 @@ endstruc
 ;return             RAX: pointer to the Image instance
 ;                        on success, null on fail
 parseImage:
+    push r8
+    push rdi
+    push rsi
+
     lea r8, [rdi]
+    lea r14, [rdi] 
     cmp word[r8], 'BM'  ; 'BM' is non-OS/2 bitmap header
     jne .mismatch
     add r8, 10
-    xor r9, r9
-    mov r9d, dword[r8]  ; store offset to raw pixel
+    xor r15, r15
+    mov r15d, dword[r8]
+    add r14, r15        ; store offset to raw pixel
                         ; data in r9
     add r8, 4
     cmp dword[r8], 40   ; check header size, 40 is standard
     jne .mismatch
     
+    push r8
     push rdi            ; allocate memory for the
     push rsi            ; Image instance
     mov rdi, Image_size
     call malloc
     pop rsi             ; restore the registers'
     pop rdi             ; state
+    pop r8
 
     add r8, 4           ; save the dimensions of the image
     save_dword
@@ -67,13 +75,14 @@ parseImage:
     push rax            ; create a Matrix that will serve
     mov rdi, [rax + height]
     mov rsi, [rax + width]
+    ;push r8
     call matrixNew      ; as pixel storage in our Image
+    ;pop r8
     mov r15, rax
     pop rax
     mov [rax + pixels], r15
-
-    lea r8, [rdi]
-    add r8, r9          ; r8 points to the beginning of
+    mov r8, r14
+    ;add r8, r9          ; r8 points to the beginning of
                         ; pixel array, ready to start
                         ; filling the Matrix with data
     xor r10, r10
@@ -82,11 +91,13 @@ parseImage:
 
 .loopInner:             ; inner 'for' loop, iterating
     inc r11             ; over columns
-    mov rdi, [rax + pixels]
+    mov rdi, r15 ;      [rax + pixels]
     mov rsi, r10
     mov rdx, r11
     movss xmm0, dword[r8] ; fill a cell in Matrix
+    push r8
     call matrixSet
+    pop r8
     add r8, 4           ; TODO: variable color depth?
     cmp r11, [rax + width]
     jl .loopInner
@@ -96,8 +107,13 @@ parseImage:
     jl .loopOuter
  
 .finally:               ; return, pointer to Image
+    pop rsi
+    pop rdi
+    pop r8
     ret                 ; already saved in RAX
 
 .mismatch:
+    xor rax, rax
+    mov ax, word[r8]
     mov rax, 0
-    ret    
+    jmp .finally   

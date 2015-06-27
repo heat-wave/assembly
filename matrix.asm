@@ -27,7 +27,7 @@ SIZE_OF_INT EQU 4
     imul rsi, [rdi + aligned_cols]
     add rsi, rdx    ; RSI =  cell number
     shl rsi, 2      ; RSI * 4 = cell start
-    mov rax, [rdi + cells] ; RAX = pointer to first cell
+    lea rax, [rdi + cells] ; RAX = pointer to first cell
     add rax, rsi
 %endmacro
 

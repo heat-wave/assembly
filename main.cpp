@@ -81,7 +81,7 @@ int main() {
     char *address;
     address = (char*)mmap(NULL, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     Image img = parseImage(address);
-    img = neg(img);
+    img = negative(img);
     if (img != NULL) {
         std::cout << "Not null!\n";
     }

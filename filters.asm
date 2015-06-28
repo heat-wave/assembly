@@ -9,6 +9,9 @@ global negative
 global getRed
 global getBlue
 global getGreen
+global setRed
+global setBlue
+global setGreen
 
 ;Красный хранится с 16 по 23 биты
 ;int getRed(int pixel);
@@ -88,7 +91,7 @@ negative:
     push    rdx
     push    rcx
     push    rbx
-    push rdi
+    push    rdi
     ;call    getCopy
     mov     rbx, rdi ;в rbx теперь ссылка на новую картинку
     call    getWidth
@@ -101,7 +104,7 @@ negative:
         xor     r9, r9
         .loopY:
 
-            mov     r10, rdi
+            mov     r10, rdi ;в r10 теперь адрес картинки
             push    r12
             push    rdi
             push    rsi
@@ -116,49 +119,44 @@ negative:
             mov     rdx, r9
             call    getPixel
 
-            xor     r11, r11
+            mov     r11, rax
 
-            push    r11
-            mov     rdi, rax
+            mov     rdi, r11
             call    getRed
             mov     r12, 255
             xchg    r12, rax
             sub     rax, r12
-            pop     r11
-            push    r11
+
             mov     rdi, r11
             mov     rsi, rax
             call    setRed
-            pop     r11
+
             mov     r11, rdi
 
-            push    r11
-            mov     rdi, rax
+            mov     rdi, r11
             call    getBlue
             mov     r12, 255
             xchg    r12, rax
             sub     rax, r12
-            pop     r11
-            push    r11
+
             mov     rdi, r11
             mov     rsi, rax
             call    setBlue
-            pop     r11
+
             mov     r11, rdi
 
-            push    r11
-            mov     rdi, rax
+            mov     rdi, r11
             call    getGreen
             mov     r12, 255
             xchg    r12, rax
             sub     rax, r12
-            pop     r11
-            push    r11
+
             mov     rdi, r11
             mov     rsi, rax
             call    setGreen
-            pop     r11
+
             mov     r11, rdi
+
 
             pop     r10
             pop     r9

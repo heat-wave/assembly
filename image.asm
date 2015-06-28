@@ -5,11 +5,16 @@ extern free
 extern malloc
 extern matrixNew        ; TODO: can I really
 extern matrixSet        ; declare Matrix functions here?
+extern matrixGet
 
 global parseImage
 global getOffset
 global getWidth
 global getHeight
+global getDepth
+global getPixel
+global setPixel
+global upgradeDepth
 
 %macro save_dword 0
    xor r10, r10
@@ -18,12 +23,11 @@ global getHeight
    
 
 struc Image
-    sz:              resq 1; size of the image in bytes
     width:           resq 1;
     height:          resq 1;
     pixels:          resq 1; pointer to Matrix instance
     depth:           resq 1;
-    offset:          resd 1;
+    offset:          resq 1;
     ;TODO: more fields if necessary
 
 endstruc
@@ -90,7 +94,10 @@ parseImage:
     ;add r8, r9          ; r8 points to the beginning of
                         ; pixel array, ready to start
                         ; filling the Matrix with data
+    mov r13, [rax + depth]
     xor r10, r10
+    cmp r13, 32
+    jl .loopOuter24
 .loopOuter:             ; outer 'for' loop, iterating
     xor r11, r11        ; over rows
 
@@ -105,12 +112,41 @@ parseImage:
     pop r8
     add r8, 4           ; TODO: variable color depth?
     cmp r11, [rax + width]
+    ;inc r11
     jl .loopInner
 
     inc r10
     cmp r10, [rax + height]
-    jl .loopOuter
- 
+    jl .loopOuter 
+    jmp .finally
+
+.loopOuter24:             ; outer 'for' loop, iterating
+    xor r11, r11        ; over rows
+
+.loopInner24:             ; inner 'for' loop, iterating
+    inc r11             ; over columns
+    mov rdi, r15 ;      [rax + pixels]
+    mov rsi, r10
+    mov rdx, r11
+    mov r14d, dword[r8] ; fill a cell in Matrix
+    shr r14, 8
+    movd xmm0, r14
+    ;movd r14, xmm0
+    ;add r14, 255
+    ;movd xmm0, r14
+    push r8
+    call matrixSet
+    pop r8
+    add r8, 3         ; TODO: variable color depth?
+    cmp r11, [rax + width]
+    ;inc r11
+    jl .loopInner24
+
+    inc r10
+    cmp r10, [rax + height]
+    jl .loopOuter24
+
+
 .finally:               ; return, pointer to Image
     pop rsi
     pop rdi
@@ -133,4 +169,24 @@ getWidth:
 
 getHeight:
     mov rax, [rdi + height]
+    ret
+
+getPixel:
+    mov rdi, [rdi + pixels]
+    call matrixGet
+    movd rax, xmm0
+    ret
+
+setPixel:
+    mov rdi, [rdi + pixels]
+    movd xmm0, rax
+    ret
+
+getDepth:
+    mov rax, [rdi + depth]
+    ret
+
+upgradeDepth:
+    mov rax, 32
+    mov [rdi + depth], rax
     ret

@@ -13,6 +13,10 @@ extern "C" {
     int getOffset(Image image);
     int getWidth(Image image);
     int getHeight(Image image);
+    int getDepth(Image image);
+    int getPixel(Image image, int x, int y);
+    void setPixel(Image image, int x, int y, int val);
+    void upgradeDepth(Image image);
 }
 #endif
 #endif //ASSEMBLY_IMAGE_H

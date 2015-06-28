@@ -1,5 +1,5 @@
 section .text
-e:
+
 extern calloc
 extern free
 extern malloc
@@ -15,6 +15,7 @@ global getDepth
 global getPixel
 global setPixel
 global upgradeDepth
+global getSize
 
 %macro save_dword 0
    xor r10, r10
@@ -23,6 +24,7 @@ global upgradeDepth
    
 
 struc Image
+    sz:              resq 1;
     width:           resq 1;
     height:          resq 1;
     pixels:          resq 1; pointer to Matrix instance
@@ -49,11 +51,14 @@ parseImage:
     lea r14, [rdi] 
     cmp word[r8], 'BM'  ; 'BM' is non-OS/2 bitmap header
     jne .mismatch
-    add r8, 10
+    add r8, 2
+    xor r13, r13
+    mov r13d, dword[r8]
+    add r8, 8
     xor r15, r15
     mov r15d, dword[r8]
     add r14, r15        ; store offset to raw pixel
-                        ; data in r9
+                        ; data in r14
     add r8, 4
     cmp dword[r8], 40   ; check header size, 40 is standard
     jne .mismatch
@@ -67,6 +72,7 @@ parseImage:
     pop rdi             ; state
     pop r8
 
+    mov [rax + sz], r13d
     mov [rax + offset], r15d
     add r8, 4           ; save the dimensions of the image
     save_dword
@@ -97,7 +103,7 @@ parseImage:
     mov r13, [rax + depth]
     xor r10, r10
     cmp r13, 32
-    jl .loopOuter24
+    jl .loops24
 .loopOuter:             ; outer 'for' loop, iterating
     xor r11, r11        ; over rows
 
@@ -120,6 +126,11 @@ parseImage:
     jl .loopOuter 
     jmp .finally
 
+.loops24:
+    lea r11, [rax + sz]
+    mov r14, [rax + width]
+    imul r14, [rax + height]
+    add [r11], r14
 .loopOuter24:             ; outer 'for' loop, iterating
     xor r11, r11        ; over rows
 
@@ -131,9 +142,9 @@ parseImage:
     mov r14d, dword[r8] ; fill a cell in Matrix
     shr r14, 8
     movd xmm0, r14
-    ;movd r14, xmm0
-    ;add r14, 255
-    ;movd xmm0, r14
+    movd r14, xmm0
+    add r14, 255
+    movd xmm0, r14
     push r8
     call matrixSet
     pop r8
@@ -179,11 +190,16 @@ getPixel:
 
 setPixel:
     mov rdi, [rdi + pixels]
-    movd xmm0, rax
+    movd xmm0, rcx
+    call matrixSet
     ret
 
 getDepth:
     mov rax, [rdi + depth]
+    ret
+
+getSize:
+    mov rax, [rdi + sz]
     ret
 
 upgradeDepth:

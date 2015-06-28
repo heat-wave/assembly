@@ -84,16 +84,14 @@ setGreen:
     ret
 
 
-;Image negative(Image in);
+;void negative(Image in);
 ;rdi - in
-;результат в rax
 negative:
     push    rdx
     push    rcx
     push    rbx
     push    rdi
-    ;call    getCopy
-    mov     rbx, rdi ;в rbx теперь ссылка на новую картинку
+    mov     rbx, rdi ;в rbx теперь ссылка на картинку
     call    getWidth
     mov     rcx, rax ;в rcx -- ширина
     call    getHeight

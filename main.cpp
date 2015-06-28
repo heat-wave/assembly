@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "image.h"
+#include "filters.h"
 
 int fd;
 
@@ -30,6 +31,7 @@ void saveFile(char* name, Image image) {
         char * buffer = new char[offset];
         read(fd, buffer, (size_t)offset);
         output.write(buffer, offset);
+        //Image image = negative(image);
         for (int i = 0; i < getHeight(image); ++i) {
             for (int j = 0; j < getWidth(image); ++j) {
                 //setPixel(image, i, j, 0);
@@ -52,13 +54,14 @@ void saveFile(char* name, Image image) {
 
 int main() {
 
-    fd = open("example.bmp", O_RDONLY);
+    fd = open("example3.bmp", O_RDONLY);
     struct stat sb;
     if (fstat(fd, &sb) == -1)
         return 1;
     char *address;
     address = (char*)mmap(NULL, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     Image img = parseImage(address);
+    img = negative(img);
     if (img != NULL) {
         std::cout << "Not null!\n";
     }

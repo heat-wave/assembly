@@ -16,6 +16,7 @@ global getPixel
 global setPixel
 global upgradeDepth
 global getSize
+global getCopy
 
 %macro save_dword 0
    xor r10, r10
@@ -206,3 +207,57 @@ upgradeDepth:
     mov rax, 32
     mov [rdi + depth], rax
     ret
+
+getCopy:
+    push rbx
+    mov rbx, rdi
+    push rdi
+    mov rdi, Image_size
+    call malloc
+    pop rdi
+    pop rbx
+    mov r15, [rdi + sz]
+    mov [rax + sz], r15
+    mov r15, [rdi + depth]
+    mov [rax + depth], r15
+    mov r15, [rdi + offset]
+    mov [rax + offset], r15
+    mov r15, [rdi + width]
+    mov [rax + width], r15
+    mov r15, [rdi + height]
+    mov [rax + height], r15
+    push rax
+    push rdi
+    mov rdi, [rdi + width]
+    mov rsi, r15
+    call matrixNew
+    mov r15, rax
+    pop rdi
+    pop rax
+    mov [rax + pixels], r15
+    push rax
+    mov rsi, [rdi + pixels]
+    mov rdi, [rax + pixels]
+    push rax
+
+.loopOuter:             ; outer 'for' loop, iterating
+    xor r11, r11        ; over rows
+
+.loopInner:             ; inner 'for' loop, iterating
+    inc r11             ; over columns
+    push rdi
+    mov rdi, [rdi + pixels] ;      [rax + pixels]
+    mov rsi, r10
+    mov rdx, r11
+    call matrixGet
+    mov rdi, [rax + pixels]
+    call matrixSet
+    pop rdi
+    cmp r11, [rax + width]
+    inc r10
+    cmp r10, [rax + height]
+    jl .loopOuter 
+
+    pop rax
+    ret
+    

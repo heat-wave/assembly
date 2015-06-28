@@ -18,6 +18,7 @@ extern "C" {
     void setPixel(Image image, int x, int y, int val);
     void upgradeDepth(Image image);
     int getSize(Image image);
+    Image getCopy(Image image);
 }
 #endif
 #endif //ASSEMBLY_IMAGE_H

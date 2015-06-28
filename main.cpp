@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     char command = argc == 3 ? argv[2][0] : ' ';
     switch (command) {
         case 'n':
-            img = negative(img);
+            negative(img);
             name.append("_neg.bmp");
             break;
         default:

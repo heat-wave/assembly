@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-Image negative(Image in);
+void negative(Image in);
 int getRed(int pixel);
 int getBlue(int pixel);
 int getGreen(int pixel);

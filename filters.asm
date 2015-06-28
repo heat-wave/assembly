@@ -6,6 +6,9 @@ extern  getPixel
 extern  setPixel
 
 global negative
+global black_and_white
+
+
 global getRed
 global getBlue
 global getGreen
@@ -171,6 +174,116 @@ negative:
             pop     rcx
             pop     rsi
             pop     rdi
+            pop     r12
+
+            inc     r9
+            cmp     r9, rcx
+            jl      .loopY
+        inc     r8
+        cmp     r8, rdx
+        jl      .loopX
+
+    pop     rax
+    pop     rbx
+    pop     rcx
+    pop     rdx
+    ret
+
+
+;void black_and_white(Image in);
+;rdi - in
+black_and_white:
+    push    rdx
+    push    rcx
+    push    rbx
+    push    rdi
+    mov     rbx, rdi ;в rbx теперь ссылка на картинку
+    call    getWidth
+    mov     rcx, rax ;в rcx -- ширина
+    call    getHeight
+    mov     rdx, rax ;в rdx -- высота
+
+    xor     r8, r8
+    .loopX:
+        xor     r9, r9
+        .loopY:
+
+            mov     r10, rdi ;в r10 теперь адрес картинки
+            push    r12
+            push    r13
+            push    r14
+            push    rdi
+            push    rsi
+            push    rcx
+            push    rdx
+            push    r8
+            push    r9
+            push    r10
+
+            mov     rdi, r10
+            mov     rsi, r8
+            mov     rdx, r9
+            call    getPixel
+
+            mov     r11, rax
+
+            mov     rdi, r11
+            call    getRed
+            mov     r12, rax
+
+            mov     rdi, r11
+            call    getBlue
+            mov     r13, rax
+
+            mov     rdi, r11
+            call    getGreen
+            mov     r14, rax
+
+            ;r12 - red, r13 - blue, r14 - green
+            push    rdx
+            push    rax
+            xor     rax, rax
+            add     rax, r12
+            add     rax, r13
+            add     rax, r14
+            mov     r8, 3
+            idiv    r8
+            mov     r12, rax
+            mov     r13, rax
+            mov     r14, rax
+            pop     rax
+            pop     rdx
+            ;Store colors
+            mov     rdi, r11
+            mov     rsi, r12
+            call    setRed
+
+            mov     rsi, r13
+            call    setBlue
+
+            mov     rsi, r14
+            call    setGreen
+
+            mov     r11, rdi
+
+
+            pop     r10
+            pop     r9
+            pop     r8
+
+            mov     rdi, r10
+            mov     rsi, r8
+            mov     rdx, r9
+            mov     rcx, r11
+            call    setPixel
+
+
+            pop     rdx
+            pop     rcx
+            pop     rsi
+            pop     rdi
+            pop     r14
+            pop     r13
             pop     r12
 
             inc     r9

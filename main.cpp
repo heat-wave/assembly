@@ -52,9 +52,16 @@ int main(int argc, char** argv) {
         case 'n':
             negative(img);
             name.append("_neg.bmp");
+            std::cout << "Picture negated!" << std::endl;
+            break;
+        case 'w':
+            black_and_white(img);
+            name.append("_bw.bmp");
+            std::cout << "Picture black-and-whited!" << std::endl;
             break;
         default:
             name.append("_copy.bmp");
+            std::cout << "Picture copied!" << std::endl;
             break;
     }
 

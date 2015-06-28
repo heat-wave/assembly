@@ -17,7 +17,7 @@ void saveFile(char* name, Image image) {
     output.open(name, std::ios::binary|std::ios::out|std::ios::trunc);
     int depth = getDepth(image);
     if (depth == 24) {
-        std::cout << "24-bit bitmap processing is under construction now. Please use a 32-bit source.";
+        std::cout << "24-bit bitmap processing is under construction now. Please use a 32-bit source.\n";
     }
     if (depth == 32) {
         int offset = getOffset(image);

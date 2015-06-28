@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 #include "image.h"
 #include "filters.h"
 
@@ -16,35 +17,17 @@ void saveFile(char* name, Image image) {
     output.open(name, std::ios::binary|std::ios::out|std::ios::trunc);
     int depth = getDepth(image);
     if (depth == 24) {
-        upgradeDepth(image);
-        char *buffer = new char[50];
-        read(fd, buffer, 2);
-        output.write(buffer, 2);
-        read(fd, buffer, 4);
-        int sz = getSize(image);
-        output.write(reinterpret_cast<const char *>(&sz), sizeof(sz));
-        read(fd, buffer, 48);
-        output.write(buffer, 48);
+        std::cout << "24-bit bitmap processing is under construction now. Please use a 32-bit source.";
     }
     if (depth == 32) {
         int offset = getOffset(image);
         char * buffer = new char[offset];
         read(fd, buffer, (size_t)offset);
         output.write(buffer, offset);
-        //Image image = negative(image);
         for (int i = 0; i < getHeight(image); ++i) {
             for (int j = 0; j < getWidth(image); ++j) {
-                //setPixel(image, i, j, 0);
                 int pixel = getPixel(image, i, j);
                 output.write(reinterpret_cast<const char *>(&pixel), sizeof(pixel));
-            }
-        }
-    }
-    else {
-        for (int i = 0; i < getHeight(image); ++i) {
-            for (int j = 0; j < getWidth(image); ++j) {
-                int pixel = (getPixel(image, i, j));
-                output.write(reinterpret_cast<const char *>(&pixel), sizeof(pixel) - 1);
             }
         }
     }
@@ -52,43 +35,33 @@ void saveFile(char* name, Image image) {
     output.close();
 }
 
-Image neg(Image im)
-{
-    int n = getWidth(im);
-    int m = getHeight(im);
-    for (int y = 0; y < n; y++)
-        for (int x = 0; x < m; x++)
-        {
-            int pix = getPixel(im, x, y);
-            int red = getRed(pix);
-            setRed(pix, 255 - red);
-            int blue = getBlue(pix);
-            setBlue(pix, 255 - blue);
-            int green = getGreen(pix);
-            setGreen(pix, 255 - green);
-            setPixel(im, x, y, pix);
-        }
-    saveFile((char*)"mofucka.bmp", im);
-    return im;
-}
+int main(int argc, char** argv) {
 
-int main() {
-
-    fd = open("example3.bmp", O_RDONLY);
+    fd = open(argv[1], O_RDONLY);
     struct stat sb;
     if (fstat(fd, &sb) == -1)
         return 1;
     char *address;
     address = (char*)mmap(NULL, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     Image img = parseImage(address);
-    img = negative(img);
-    if (img != NULL) {
-        std::cout << "Not null!\n";
+    std::string name(argv[1]);
+    name = name.substr(0, name.length() - 4);
+
+    char command = argc == 3 ? argv[2][0] : ' ';
+    switch (command) {
+        case 'n':
+            img = negative(img);
+            name.append("_neg.bmp");
+            break;
+        default:
+            name.append("_copy.bmp");
+            break;
     }
-    else {
-        std::cout << "Null image!\n";
-    }
-    saveFile((char*)"example2.bmp", img);
+
+    char arr[name.length() + 1];
+    strcpy(arr, name.c_str());
+    saveFile(arr, img);
+
     return 0;
 
 }

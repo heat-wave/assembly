@@ -55,7 +55,21 @@ void saveFile(char* name, Image image) {
 Image neg(Image im)
 {
     int n = getWidth(im);
-    int m = getHeignt(im);
+    int m = getHeight(im);
+    for (int y = 0; y < n; y++)
+        for (int x = 0; x < m; x++)
+        {
+            int pix = getPixel(im, x, y);
+            int red = getRed(pix);
+            setRed(pix, 255 - red);
+            int blue = getBlue(pix);
+            setBlue(pix, 255 - blue);
+            int green = getGreen(pix);
+            setGreen(pix, 255 - green);
+            setPixel(im, x, y, pix);
+        }
+    saveFile((char*)"mofucka.bmp", im);
+    return im;
 }
 
 int main() {
@@ -67,7 +81,7 @@ int main() {
     char *address;
     address = (char*)mmap(NULL, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     Image img = parseImage(address);
-    img = negative(img);
+    img = neg(img);
     if (img != NULL) {
         std::cout << "Not null!\n";
     }

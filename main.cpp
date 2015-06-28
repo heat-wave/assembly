@@ -52,6 +52,12 @@ void saveFile(char* name, Image image) {
     output.close();
 }
 
+Image neg(Image im)
+{
+    int n = getWidth(im);
+    int m = getHeignt(im);
+}
+
 int main() {
 
     fd = open("example3.bmp", O_RDONLY);

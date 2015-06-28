@@ -1,5 +1,5 @@
 section .text
-
+e:
 extern calloc
 extern free
 extern malloc
@@ -7,6 +7,9 @@ extern matrixNew        ; TODO: can I really
 extern matrixSet        ; declare Matrix functions here?
 
 global parseImage
+global getOffset
+global getWidth
+global getHeight
 
 %macro save_dword 0
    xor r10, r10
@@ -16,10 +19,11 @@ global parseImage
 
 struc Image
     sz:              resq 1; size of the image in bytes
-    width:           resd 1;
-    height:          resd 1;
+    width:           resq 1;
+    height:          resq 1;
     pixels:          resq 1; pointer to Matrix instance
-    depth:           resw 1;
+    depth:           resq 1;
+    offset:          resd 1;
     ;TODO: more fields if necessary
 
 endstruc
@@ -59,6 +63,7 @@ parseImage:
     pop rdi             ; state
     pop r8
 
+    mov [rax + offset], r15d
     add r8, 4           ; save the dimensions of the image
     save_dword
     mov [rax + width], r10d
@@ -116,4 +121,16 @@ parseImage:
     xor rax, rax
     mov ax, word[r8]
     mov rax, 0
-    jmp .finally   
+    jmp .finally  
+
+getOffset:
+    mov rax, [rdi + offset]
+    ret
+
+getWidth:
+    mov rax, [rdi + width]
+    ret
+
+getHeight:
+    mov rax, [rdi + height]
+    ret

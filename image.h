@@ -10,6 +10,9 @@ typedef void * Image;
 #ifdef __cplusplus
 extern "C" {
     Image parseImage(char* file);
+    int getOffset(Image image);
+    int getWidth(Image image);
+    int getHeight(Image image);
 }
 #endif
 #endif //ASSEMBLY_IMAGE_H

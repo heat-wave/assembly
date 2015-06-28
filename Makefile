@@ -24,7 +24,7 @@ $(EXECUTABLE).o:
 $(LIBIMG).a: image.o matrix.o
 	ar rcs $@ image.o matrix.o
 
-matrix.o: matrix.asm
+matrix.o: matrix2.asm
 	$(ASM) $(ASFLAGS) -o $@ $<
 
 image.o: image.asm

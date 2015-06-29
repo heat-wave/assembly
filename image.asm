@@ -47,7 +47,11 @@ parseImage:
     push r8
     push rdi
     push rsi
-
+    push r12
+    push r13
+    push r14
+    push r15
+    
     lea r8, [rdi]
     lea r14, [rdi] 
     cmp word[r8], 'BM'  ; 'BM' is non-OS/2 bitmap header
@@ -91,14 +95,12 @@ parseImage:
     push rax            ; create a Matrix that will serve
     mov rdi, [rax + height]
     mov rsi, [rax + width]
-    ;push r8
     call matrixNew      ; as pixel storage in our Image
-    ;pop r8
     mov r15, rax
     pop rax
     mov [rax + pixels], r15
     mov r8, r14
-    ;add r8, r9          ; r8 points to the beginning of
+                        ; r8 points to the beginning of
                         ; pixel array, ready to start
                         ; filling the Matrix with data
     mov r13, [rax + depth]
@@ -117,9 +119,8 @@ parseImage:
     push r8
     call matrixSet
     pop r8
-    add r8, 4           ; TODO: variable color depth?
+    add r8, 4           
     cmp r11, [rax + width]
-    ;inc r11
     jl .loopInner
 
     inc r10
@@ -149,9 +150,8 @@ parseImage:
     push r8
     call matrixSet
     pop r8
-    add r8, 3         ; TODO: variable color depth?
+    add r8, 3         
     cmp r11, [rax + width]
-    ;inc r11
     jl .loopInner24
 
     inc r10
@@ -160,6 +160,10 @@ parseImage:
 
 
 .finally:               ; return, pointer to Image
+    pop r15
+    pop r14
+    pop r13
+    pop r12
     pop rsi
     pop rdi
     pop r8
@@ -207,57 +211,3 @@ upgradeDepth:
     mov rax, 32
     mov [rdi + depth], rax
     ret
-
-getCopy:
-    push rbx
-    mov rbx, rdi
-    push rdi
-    mov rdi, Image_size
-    call malloc
-    pop rdi
-    pop rbx
-    mov r15, [rdi + sz]
-    mov [rax + sz], r15
-    mov r15, [rdi + depth]
-    mov [rax + depth], r15
-    mov r15, [rdi + offset]
-    mov [rax + offset], r15
-    mov r15, [rdi + width]
-    mov [rax + width], r15
-    mov r15, [rdi + height]
-    mov [rax + height], r15
-    push rax
-    push rdi
-    mov rdi, [rdi + width]
-    mov rsi, r15
-    call matrixNew
-    mov r15, rax
-    pop rdi
-    pop rax
-    mov [rax + pixels], r15
-    push rax
-    mov rsi, [rdi + pixels]
-    mov rdi, [rax + pixels]
-    push rax
-
-.loopOuter:             ; outer 'for' loop, iterating
-    xor r11, r11        ; over rows
-
-.loopInner:             ; inner 'for' loop, iterating
-    inc r11             ; over columns
-    push rdi
-    mov rdi, [rdi + pixels] ;      [rax + pixels]
-    mov rsi, r10
-    mov rdx, r11
-    call matrixGet
-    mov rdi, [rax + pixels]
-    call matrixSet
-    pop rdi
-    cmp r11, [rax + width]
-    inc r10
-    cmp r10, [rax + height]
-    jl .loopOuter 
-
-    pop rax
-    ret
-    

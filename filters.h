@@ -5,6 +5,10 @@
 extern "C" {
     void negative(Image im);
     void black_and_white(Image im);
+    void blur(Image im);
+    //void hi_pass(Image im);
+    void light(Image im);
+
 
     int getRed(int pixel);
     int getBlue(int pixel);

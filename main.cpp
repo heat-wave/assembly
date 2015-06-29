@@ -59,6 +59,16 @@ int main(int argc, char** argv) {
             name.append("_bw.bmp");
             std::cout << "Picture black-and-whited!" << std::endl;
             break;
+        case 'b':
+            blur(img);
+            name.append("_blur.bmp");
+            std::cout << "Picture blured!" << std::endl;
+            break;
+        case 'l':
+            light(img);
+            name.append("_light.bmp");
+            std::cout << "Picture lighted!" << std::endl;
+            break;
         default:
             name.append("_copy.bmp");
             std::cout << "Picture copied!" << std::endl;
